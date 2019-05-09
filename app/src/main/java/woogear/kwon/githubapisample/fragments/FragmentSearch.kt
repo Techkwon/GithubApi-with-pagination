@@ -45,6 +45,10 @@ class FragmentSearch : Fragment(){
         searchButton.setOnClickListener {
             updateList()
         }
+
+        removeQuery.setOnClickListener {
+            searchText.setText("")
+        }
     }
 
     private fun updateList(){

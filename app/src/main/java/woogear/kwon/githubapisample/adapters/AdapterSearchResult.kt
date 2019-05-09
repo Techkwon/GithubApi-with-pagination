@@ -51,6 +51,7 @@ class AdapterSearchResult(
         holder.checkbox.setOnClickListener {
             if(!holder.checkbox.isChecked) viewModel.delete(userLogin) else viewModel.addFavoriteUsers(list[position])
         }
+
     }
 
     fun updateList(data: List<GithubUser>) {
