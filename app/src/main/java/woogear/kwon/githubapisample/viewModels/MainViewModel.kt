@@ -27,6 +27,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val queryLiveData = MutableLiveData<String>()
     private val totalPageLiveData = MutableLiveData<Int>()
 
+
+
     fun getGithubUsers(query: String){
 
         queryLiveData.postValue(query)
@@ -54,18 +56,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addFavoriteUsers(user: GithubUser){
-        repository.addFavorite(user)
+    fun getFavoriteUsers(){
         users.clear()
         users.addAll(repository.getFavoriteUsers())
         favoriteLiveData.postValue(users)
     }
 
-    fun getFavoriteUsers(){
+    fun addFavoriteUsers(user: GithubUser){
+        repository.addFavorite(user)
         users.clear()
         users.addAll(repository.getFavoriteUsers())
         favoriteLiveData.postValue(users)
-
     }
 
     private fun getMoreUsers(immutableQuery: String){

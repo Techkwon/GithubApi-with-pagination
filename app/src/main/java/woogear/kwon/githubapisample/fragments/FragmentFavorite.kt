@@ -16,6 +16,7 @@ import woogear.kwon.githubapisample.adapters.AdapterFavorite
 import woogear.kwon.githubapisample.data.DBManager
 import woogear.kwon.githubapisample.model.GithubUser
 import woogear.kwon.githubapisample.viewModels.MainViewModel
+import java.lang.Exception
 
 class FragmentFavorite : Fragment(){
 
@@ -23,9 +24,15 @@ class FragmentFavorite : Fragment(){
     private lateinit var viewModel: MainViewModel
     private lateinit var adapter: AdapterFavorite
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this).get(MainViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_favorite, container, false)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         viewModel.getFavoriteUsers()
         adapter = AdapterFavorite(this.context!!, viewModel)
         return view
@@ -40,8 +47,10 @@ class FragmentFavorite : Fragment(){
     }
 
     private fun observeLiveData(){
-        viewModel.favoriteLiveData.observe(this, Observer {
-            adapter.updateList(it!!)
+        viewModel.favoriteLiveData.observe(this, Observer { it ->
+            it?.let{
+                adapter.updateList(it)
+            }
         })
     }
 

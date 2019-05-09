@@ -15,18 +15,25 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import woogear.kwon.githubapisample.R
 import woogear.kwon.githubapisample.adapters.AdapterSearchResult
 import woogear.kwon.githubapisample.viewModels.MainViewModel
+import java.lang.Exception
 
 class FragmentSearch : Fragment(){
 
+    private val TAG = "[FragmentSearch]"
     private lateinit var viewModel: MainViewModel
     private lateinit var adapter: AdapterSearchResult
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this).get(MainViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         val view = inflater.inflate(R.layout.fragment_search, container, false)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         adapter = AdapterSearchResult(this.context!!, viewModel)
-
         return view
     }
 
@@ -61,10 +68,12 @@ class FragmentSearch : Fragment(){
     }
 
     private fun observeData(){
-        viewModel.searchLiveData.observe(this, Observer {
-            progressbar.visibility = View.GONE
-            adapter.updateList(it!!.items)
-            recyclerView.smoothScrollToPosition(0)
+        viewModel.searchLiveData.observe(this, Observer { it ->
+            it?.let{
+                progressbar.visibility = View.GONE
+                adapter.updateList(it.items)
+                recyclerView.smoothScrollToPosition(0)
+            }
         })
 
         viewModel.observeMore.observe(this, Observer {
@@ -72,8 +81,10 @@ class FragmentSearch : Fragment(){
         })
 
         viewModel.moreLiveData.observe(this, Observer {
-            progressbar.visibility = View.GONE
-            adapter.addList(it!!.items)
+            it?.let{
+                progressbar.visibility = View.GONE
+                adapter.addList(it.items)
+            }
         })
     }
 
