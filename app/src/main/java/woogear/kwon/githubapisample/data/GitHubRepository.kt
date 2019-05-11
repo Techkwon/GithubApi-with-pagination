@@ -11,20 +11,25 @@ import woogear.kwon.githubapisample.utils.APIClient
 import woogear.kwon.githubapisample.utils.APIInterface
 import java.util.concurrent.TimeUnit
 
-class GitHubRepository(val context: Context) {
+/**
+ * GitHubRepository class handles data from extra web API or from inner SQLite db
+ * */
 
+class GitHubRepository(private val context: Context) {
+
+    private val TAG: String = "[GitHubRepository]"
     private var requestedPage = 1
+    private var isRequestInProgress = false
+
     companion object {
         const val itemsPerPage = 20
     }
 
-    private var isRequestInProgress = false
     private var db: DBManager = DBManager(context, "favorite_users.db", null, 1)
-    private val TAG: String = "[GitHubRepository]"
 
     fun searchUser(query: String) : Observable<SearchResponse>{
         val api: APIInterface = APIClient.getClient().create(APIInterface::class.java)
-        requestedPage = 1
+        requestedPage = 1 //initial page number for every searching results, it increases whenever the scroll arrives at the last position.
 
         return api.getGithubUsers(query, requestedPage, itemsPerPage)
             .delay(1, TimeUnit.SECONDS)
@@ -37,11 +42,11 @@ class GitHubRepository(val context: Context) {
         if (isRequestInProgress) return null
         isRequestInProgress = true
 
-        val api: APIInterface = APIClient.getClient().create(APIInterface::class.java)
-
-        if(requestedPage < totalPage) requestedPage++ else return null
+        if(requestedPage < totalPage) requestedPage ++ else return null
 
         Log.d(TAG, "currentPage: $requestedPage,  totalPage: $totalPage")
+
+        val api: APIInterface = APIClient.getClient().create(APIInterface::class.java)
         return api.getGithubUsers(query, requestedPage, itemsPerPage)
             .delay(1, TimeUnit.SECONDS)
             .doOnError {isRequestInProgress = false}
@@ -58,11 +63,11 @@ class GitHubRepository(val context: Context) {
         return db.selectUsers()
     }
 
-    fun contains(user: String) : Boolean {
-        return db.contains(user)
+    fun isSaved(user: String) : Boolean {
+        return db.isSaved(user)
     }
 
-    fun delete(user: String){
+    fun deleteUser(user: String){
         db.deleteUser(user)
     }
 

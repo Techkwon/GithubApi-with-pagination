@@ -10,23 +10,23 @@ import woogear.kwon.githubapisample.model.SearchResponse
 import woogear.kwon.githubapisample.data.GitHubRepository
 import woogear.kwon.githubapisample.model.GithubUser
 
+/**
+ * SharedViewModel is shared by two fragments (FragmentSearch & FragmentFavorite)
+ * It keeps data for Fragment UI, and communicates with GitHubRepository to request data
+ * */
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
-    val TAG: String = "[MainViewModel]"
-
-    private val repository = GitHubRepository(application.applicationContext)
-
+    val TAG: String = "[SharedViewModel]"
     val searchLiveData = MutableLiveData<SearchResponse>()
     val moreLiveData = MutableLiveData<SearchResponse>()
     val observeMore = MutableLiveData<Boolean>()
-    val users = ArrayList<GithubUser>()
     val favoriteLiveData = MutableLiveData<ArrayList<GithubUser>>()
-
+    private val users = ArrayList<GithubUser>()
     private val disposable = CompositeDisposable()
     private val queryLiveData = MutableLiveData<String>()
     private val totalPageLiveData = MutableLiveData<Int>()
-
+    private val repository = GitHubRepository(application.applicationContext)
 
 
     fun getGithubUsers(query: String){
@@ -36,24 +36,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             .subscribe {
                 searchLiveData.postValue(it)
 
+                //calculate the number of total page
                 if (it.total_count % GitHubRepository.itemsPerPage == 0) {
                     totalPageLiveData.postValue(it.total_count / GitHubRepository.itemsPerPage)
                 } else {
                     totalPageLiveData.postValue((it.total_count / GitHubRepository.itemsPerPage) + 1)
                 }
             })
-    }
-
-    fun listScrolled(lastVisibleItemPosition: Int, totalItemCount: Int){
-
-        if(lastVisibleItemPosition + 1 == totalItemCount) {
-            val immutableQuery = getLastQuery()
-
-            if(immutableQuery != null){
-                Log.d(TAG, "Last Query : $immutableQuery")
-                getMoreUsers(immutableQuery)
-            }
-        }
     }
 
     fun getFavoriteUsers(){
@@ -69,6 +58,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         favoriteLiveData.postValue(users)
     }
 
+    fun listScrolled(lastVisibleItemPosition: Int, totalItemCount: Int){
+
+        if(lastVisibleItemPosition + 1 == totalItemCount) { // when it reaches the last position of the scroll
+            val immutableQuery = getLastQuery()
+
+            if(immutableQuery != null){
+                Log.d(TAG, "Last Query : $immutableQuery")
+                getMoreUsers(immutableQuery)
+            }
+        }
+    }
+
     private fun getMoreUsers(immutableQuery: String){
 
         val observable = repository.requestMore(immutableQuery, totalPageLiveData.value!!)
@@ -78,17 +79,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 .subscribe{
                     moreLiveData.postValue(it)
                 })
+
         } else {
             //no more results..
         }
     }
 
-    fun contains(user: String) : Boolean {
-        return repository.contains(user)
+    fun isSaved(user: String) : Boolean {
+        return repository.isSaved(user)
     }
 
-    fun delete(user: String) {
-        repository.delete(user)
+    fun deleteUser(user: String) {
+        repository.deleteUser(user)
         users.clear()
         users.addAll(repository.getFavoriteUsers())
         favoriteLiveData.postValue(users)

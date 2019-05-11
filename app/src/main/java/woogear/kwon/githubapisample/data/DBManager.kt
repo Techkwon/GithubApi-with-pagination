@@ -7,6 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import woogear.kwon.githubapisample.model.GithubUser
 
+/**
+ * DBManager class manages data with SQLite database
+ * */
+
 class DBManager(context: Context?, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) :
 
     SQLiteOpenHelper(
@@ -60,15 +64,17 @@ class DBManager(context: Context?, name: String?, factory: SQLiteDatabase.Cursor
     }
 
 
-    fun contains(login: String) : Boolean{
+    fun isSaved(login: String) : Boolean{
         db = readableDatabase
         val query = "SELECT * FROM $tableName WHERE login = '$login'"
         val cursor: Cursor = db.rawQuery(query, null)
+
         if(cursor.count <= 0){
             cursor.close()
             db.close()
             return false
-    }
+        }
+
         cursor.close()
         db.close()
         return true
@@ -99,7 +105,6 @@ class DBManager(context: Context?, name: String?, factory: SQLiteDatabase.Cursor
         val query = "DELETE FROM $tableName WHERE login = '$user'"
         db.execSQL(query)
         db.close()
-
     }
 
 

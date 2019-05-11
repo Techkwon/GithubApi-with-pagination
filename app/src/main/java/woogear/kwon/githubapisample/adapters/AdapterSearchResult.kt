@@ -2,7 +2,6 @@ package woogear.kwon.githubapisample.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -13,17 +12,15 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_user.view.*
 import woogear.kwon.githubapisample.R
-import woogear.kwon.githubapisample.data.DBManager
 import woogear.kwon.githubapisample.model.GithubUser
-import woogear.kwon.githubapisample.viewModels.MainViewModel
+import woogear.kwon.githubapisample.viewModels.SharedViewModel
 
 class AdapterSearchResult(
     private val context: Context,
-    private val viewModel: MainViewModel
+    private val viewModel: SharedViewModel
 ) : RecyclerView.Adapter<AdapterSearchResult.ViewHolder>() {
 
     private val list = ArrayList<GithubUser>()
-    private var db: DBManager = DBManager(context, "favorite_users.db", null, 1)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View = LayoutInflater.from(parent.context).inflate(R.layout.item_user, parent, false)
@@ -46,10 +43,10 @@ class AdapterSearchResult(
         holder.login.text = "id: $userLogin"
         holder.score.text = "score: $score"
 
-        holder.checkbox.isChecked = viewModel.contains(userLogin)
+        holder.checkbox.isChecked = viewModel.isSaved(userLogin)
 
         holder.checkbox.setOnClickListener {
-            if(!holder.checkbox.isChecked) viewModel.delete(userLogin) else viewModel.addFavoriteUsers(list[position])
+            if(!holder.checkbox.isChecked) viewModel.deleteUser(userLogin) else viewModel.addFavoriteUsers(list[position])
         }
 
     }
@@ -66,7 +63,6 @@ class AdapterSearchResult(
     }
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v){
-
         val checkbox: CheckBox = v.checkbox
         val avatar: ImageView = v.userPhoto
         val login: TextView = v.userName

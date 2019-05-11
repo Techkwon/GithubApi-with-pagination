@@ -12,17 +12,15 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_user.view.*
 import woogear.kwon.githubapisample.R
-import woogear.kwon.githubapisample.data.DBManager
 import woogear.kwon.githubapisample.model.GithubUser
-import woogear.kwon.githubapisample.viewModels.MainViewModel
+import woogear.kwon.githubapisample.viewModels.SharedViewModel
 
 class AdapterFavorite(
     private val context: Context,
-    private val viewModel: MainViewModel
-    ) : RecyclerView.Adapter<AdapterFavorite.ViewHolder>() {
+    private val viewModel: SharedViewModel
+) : RecyclerView.Adapter<AdapterFavorite.ViewHolder>() {
 
     private val list = ArrayList<GithubUser>()
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View = LayoutInflater.from(parent.context).inflate(R.layout.item_user, parent, false)
@@ -47,7 +45,7 @@ class AdapterFavorite(
         holder.checkBox.isChecked = true
 
         holder.checkBox.setOnClickListener{
-            if(!holder.checkBox.isChecked) viewModel.delete(userLogin) else viewModel.addFavoriteUsers(list[position])
+            if(!holder.checkBox.isChecked) viewModel.deleteUser(userLogin) else viewModel.addFavoriteUsers(list[position])
         }
     }
 
