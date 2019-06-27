@@ -23,5 +23,6 @@ class MainActivity : AppCompatActivity() {
 
         view_pager.adapter = adapter
 
+        //from git web
     }
 }
